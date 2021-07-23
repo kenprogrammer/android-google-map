@@ -36,6 +36,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     FusedLocationProviderClient fusedLocationClient;
     private ActivityMapsBinding binding;
+    String[] cordinates={"-34, 151","-31.083332, 150.916672","-32.916668, 151.750000","-27.470125, 153.021072"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,12 +75,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
 
-                            String mLocation=getLocationName(location.getLatitude(), location.getLongitude());
+                            ///String mLocation=getLocationName(location.getLatitude(), location.getLongitude());
 
                             if(mMap != null) {
-                                LatLng mylocation = new LatLng(location.getLatitude(), location.getLongitude());
-                                mMap.addMarker(new MarkerOptions().position(mylocation).title(mLocation));
-                                mMap.moveCamera(CameraUpdateFactory.newLatLng(mylocation));
+                                for (int i = 0; i < cordinates.length; i++) {
+                                    String[] result=cordinates[i].split(",");
+                                    System.out.println("Lat: "+result[0]);
+                                    System.out.println("Lng: "+result[1]);
+
+                                    String mLocation=getLocationName(Double.parseDouble(result[0]), Double.parseDouble(result[1]));
+
+                                    LatLng mylocation = new LatLng(Double.parseDouble(result[0]),Double.parseDouble(result[1]));
+                                    mMap.addMarker(new MarkerOptions().position(mylocation).title(mLocation));
+                                    mMap.moveCamera(CameraUpdateFactory.newLatLng(mylocation));
+                                }
                             }else{
                                 Toast.makeText(getApplicationContext(), "Map Not Ready", Toast.LENGTH_LONG).show();
                             }
@@ -107,6 +116,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Get location
     public String getLocationName(Double latitude,Double longitude)
     {
+        String cityName;
+        String stateName;
+        String countryName;
+
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         List<Address> addresses = null;
         try {
@@ -114,9 +127,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String cityName = addresses.get(0).getAddressLine(0);
-        String stateName = addresses.get(0).getAddressLine(1);
-        String countryName = addresses.get(0).getAddressLine(2);
+
+        if(!addresses.isEmpty()) {
+            cityName = addresses.get(0).getAddressLine(0);
+            stateName = addresses.get(0).getAddressLine(1);
+            countryName = addresses.get(0).getAddressLine(2);
+        }else{
+            cityName="Marker";
+        }
 
         return cityName;
     }
